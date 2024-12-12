@@ -1,0 +1,73 @@
+import pandas as pd
+
+#Import Data from CSV
+try:
+    df = pd.read_csv('salary_data.csv')
+    print("Data imported successfully!")
+    print(df.head())  # Display the first few rows of the dataframe
+
+except FileNotFoundError:
+    print("Error: The file 'salary_data.csv' was not found.")
+except Exception as e:
+    print(f"An error occurred: {e}")
+
+def get_employee_details(name):
+    # Task 2: Create Employee Function
+    try:
+        # Search for employee by name
+        employee = df[df['EmployeeName'] == name]
+        
+        if employee.empty:
+            return f"Employee '{name}' not found."
+        else:
+            return employee
+    except Exception as e:
+        return f"An error occurred while retrieving details: {e}"
+
+print(get_employee_details('Albert Pardini'))
+
+# Task 3: Data Processing with Dictionary
+employee_dict = {}
+
+for index, row in df.iterrows():
+    employee_dict[row['EmployeeName']] = {
+        'JobTitle': row['JobTitle'],
+        'BasePay': row['BasePay'],
+        'OvertimePay': row['OvertimePay'],
+        'OtherPay': row['OtherPay'],
+        'TotalPay': row['TotalPay']
+    }
+
+print(employee_dict)
+
+import zipfile
+import os
+
+# Export Employee Details to CSV and Zip
+def export_to_csv_and_zip(name):
+    try:
+        # Get employee details using the function from Task 2
+        employee_details = get_employee_details(name)
+        
+        if isinstance(employee_details, str):  # If it's an error message
+            print(employee_details)
+            return
+        
+        # Export employee details to a CSV file
+        output_folder = 'Employee_Profile'
+        os.makedirs(output_folder, exist_ok=True)  # Create the folder if it doesn't exist
+        output_file = os.path.join(output_folder, f"{name}_details.csv")
+        employee_details.to_csv(output_file, index=False)
+        
+        # Zip the CSV file
+        zip_file = 'Employee_Profile.zip'
+        with zipfile.ZipFile(zip_file, 'w') as zipf:
+            zipf.write(output_file, os.path.basename(output_file))
+        
+        print(f"Employee details for {name} have been exported and zipped.")
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Example usage
+export_to_csv_and_zip('Albert Pardini')
